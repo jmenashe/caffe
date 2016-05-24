@@ -1,4 +1,4 @@
-name: "Goal"
+name: "goal"
 layer {
   name: "goal"
   type: "Data"
@@ -14,7 +14,7 @@ layer {
   }
   data_param {
     source: "/media/jake/data/datasets/goal_data/database-train"
-    batch_size: 1000
+    batch_size: 256
     backend: LMDB
   }
 }
@@ -33,7 +33,7 @@ layer {
   }
   data_param {
     source: "/media/jake/data/datasets/goal_data/database-test"
-    batch_size: 1000
+    batch_size: 100
     backend: LMDB
   }
 }
@@ -261,57 +261,114 @@ layer {
   }
 }
 layer {
-  name: "ip1"
+  name: "fc6"
   type: "InnerProduct"
   bottom: "pool5"
-  top: "ip1"
+  top: "fc6"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
-    num_output: 500
+    num_output: 4096
     weight_filler {
-      type: "xavier"
+      type: "gaussian"
+      std: 0.005
     }
     bias_filler {
       type: "constant"
+      value: 1
     }
   }
 }
 layer {
-  name: "relu3"
+  name: "relu6"
   type: "ReLU"
-  bottom: "ip1"
-  top: "ip1"
+  bottom: "fc6"
+  top: "fc6"
 }
 layer {
-  name: "ip2"
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7"
   type: "InnerProduct"
-  bottom: "ip1"
-  top: "ip2"
+  bottom: "fc6"
+  top: "fc7"
   param {
     lr_mult: 1
+    decay_mult: 1
   }
   param {
     lr_mult: 2
+    decay_mult: 0
   }
   inner_product_param {
-    num_output: 10
+    num_output: 4096
     weight_filler {
-      type: "xavier"
+      type: "gaussian"
+      std: 0.005
     }
     bias_filler {
       type: "constant"
+      value: 1
+    }
+  }
+}
+layer {
+  name: "relu7"
+  type: "ReLU"
+  bottom: "fc7"
+  top: "fc7"
+}
+layer {
+  name: "drop7"
+  type: "Dropout"
+  bottom: "fc7"
+  top: "fc7"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8"
+  type: "InnerProduct"
+  bottom: "fc7"
+  top: "fc8"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 1000
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
     }
   }
 }
 layer {
   name: "accuracy"
   type: "Accuracy"
-  bottom: "ip2"
+  bottom: "fc8"
   bottom: "label"
   top: "accuracy"
   include {
@@ -321,7 +378,7 @@ layer {
 layer {
   name: "loss"
   type: "SoftmaxWithLoss"
-  bottom: "ip2"
+  bottom: "fc8"
   bottom: "label"
   top: "loss"
 }
