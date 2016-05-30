@@ -1,39 +1,9 @@
-name: "goal"
+name: "ball"
 layer {
-  name: "goal"
-  type: "Data"
+  name: "data"
+  type: "Input"
   top: "data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  transform_param {
-    mirror: true
-    mean_file: "/home/jake/nao/trunk/tools/trainers/datasets/goal_data/database-train-mean.binaryproto"
-  }
-  data_param {
-    source: "/home/jake/nao/trunk/tools/trainers/datasets/goal_data/database-train"
-    batch_size: 100
-    backend: LMDB
-  }
-}
-layer {
-  name: "goal"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TEST
-  }
-  transform_param {
-    mirror: false
-    mean_file: "/home/jake/nao/trunk/tools/trainers/datasets/goal_data/database-train-mean.binaryproto"
-  }
-  data_param {
-    source: "/home/jake/nao/trunk/tools/trainers/datasets/goal_data/database-test"
-    batch_size: 100
-    backend: LMDB
-  }
+  input_param { shape: { dim: 1 dim: 3 dim: 32 dim: 32 } }
 }
 layer {
   name: "conv1"
@@ -49,8 +19,8 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 16
-    kernel_size: 8
+    num_output: 32
+    kernel_size: 3
     stride: 8
     weight_filler {
       type: "gaussian"
@@ -116,19 +86,9 @@ layer {
   }
 }
 layer {
-  name: "accuracy"
-  type: "Accuracy"
+  name: "prob"
+  type: "Softmax"
   bottom: "fc8"
-  bottom: "label"
-  top: "accuracy"
-  include {
-    phase: TEST
-  }
+  top: "prob"
 }
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "fc8"
-  bottom: "label"
-  top: "loss"
-}
+
