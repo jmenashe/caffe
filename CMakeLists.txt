@@ -6,6 +6,13 @@ if(POLICY CMP0054)
   cmake_policy(SET CMP0054 NEW)
 endif()
 
+IF(EXISTS /u/jmenashe)
+  SET(CONDOR TRUE)
+  SET(AVHOME /u/www/users/AustinVilla) 
+ELSE()
+  SET(CONDOR FALSE)
+ENDIF()
+
 # ---[ Caffe project
 project(Caffe C CXX)
 
@@ -26,7 +33,11 @@ include(cmake/Summary.cmake)
 include(cmake/ConfigGen.cmake)
 
 # ---[ Options
-caffe_option(CPU_ONLY  "Build Caffe without CUDA support" OFF) # TODO: rename to USE_CUDA
+IF(${CONDOR})
+  caffe_option(CPU_ONLY  "Build Caffe without CUDA support" ON)
+ELSE()
+  caffe_option(CPU_ONLY  "Build Caffe without CUDA support" OFF) # TODO: rename to USE_CUDA
+ENDIF()
 caffe_option(USE_CUDNN "Build Caffe with cuDNN library support" ON IF NOT CPU_ONLY)
 caffe_option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 caffe_option(BUILD_python "Build Python wrapper" ON)
